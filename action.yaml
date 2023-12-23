@@ -1,31 +1,13 @@
 name: cloud-login
 description: ''
 inputs:
-  vault_addr:
+  vault_credentials:
     description: ''
     required: false
-  vault_method:
+  aws_credentials:
     description: ''
     required: false
-  vault_path:
-    description: ''
-    required: false
-  vault_role:
-    description: ''
-    required: false
-  aws_role:
-    description: ''
-    required: false
-  aws_region:
-    description: ''
-    required: false
-  azure_client_id:
-    description: ''
-    required: false
-  azure_tenant_id:
-    description: ''
-    required: false
-  azure_subscription_id:
+  azure_credentials:
     description: ''
     required: false
   openstack_config:
@@ -36,34 +18,18 @@ runs:
   steps:
     # Hashicorp Vault #########################################################
     - uses: hashicorp/vault-action@v2
-      if: inputs.vault_addr != ''
-      with:
-        url: ${{ inputs.vault_addr }}
-        method: ${{ inputs.vault_method }}
-        path: ${{ inputs.vault_path }}
-        role: ${{ inputs.vault_role }}
-        exportToken: true
+      if: inputs.vault_credentials != ''
+      with: ${{ fromJson(inputs.vault_credentials) }}
 
     # AWS #####################################################################
     - uses: aws-actions/configure-aws-credentials@v4
-      if: inputs.aws_role != ''
-      with:
-        role-to-assume: ${{ inputs.aws_role }}
-        aws-region: ${{ inputs.aws_region }}
+      if: inputs.aws_credentials != ''
+      with: ${{ fromJson(inputs.aws_credentials) }}
 
     # Azure ###################################################################
     - uses: azure/login@v1
-      if: inputs.azure_client_id != ''
-      with:
-        client-id: ${{ inputs.azure_client_id }}
-        tenant-id: ${{ inputs.azure_tenant_id }}
-        subscription-id: ${{ inputs.azure_subscription_id }}
-    - if: inputs.azure_client_id != ''
-      run: |
-        echo "ARM_CLIENT_ID=${{ inputs.azure_client_id }}" | tee -a $GITHUB_ENV
-        echo "ARM_TENANT_ID=${{ inputs.azure_tenant_id }}" | tee -a $GITHUB_ENV
-        echo "ARM_SUBSCRIPTION_ID=${{ inputs.azure_subscription_id }}" | tee -a $GITHUB_ENV
-      shell: bash
+      if: inputs.azure_credentials != ''
+      with: ${{ fromJson(inputs.azure_credentials) }}
 
     # Openstack ###############################################################
     - if: inputs.openstack_config != ''
