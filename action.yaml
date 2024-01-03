@@ -30,6 +30,12 @@ runs:
     - uses: azure/login@v1
       if: inputs.azure_credentials != ''
       with: ${{ fromJson(inputs.azure_credentials) }}
+    - if: inputs.azure_credentials != ''
+      run: |
+        echo "ARM_CLIENT_ID=$(jq -r '.client-id' <<< '${{ inputs.aws_credentials }}')" | tee -a $GITHUB_ENV
+        echo "ARM_TENANT_ID=$(jq -r '.tenant-id' <<< '${{ inputs.aws_credentials }}')" | tee -a $GITHUB_ENV
+        echo "ARM_SUBSCRIPTION_ID=$(jq -r '.subscription-id' <<< '${{ inputs.aws_credentials }}')" | tee -a $GITHUB_ENV
+      shell: bash
 
     # Openstack ###############################################################
     - if: inputs.openstack_config != ''
